@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="sweng452w" name="finalProject" type="sweng452w" output="screen" />
+</launch>
