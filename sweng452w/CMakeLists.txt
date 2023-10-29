@@ -115,8 +115,9 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
+  
 )
 
 ## Declare a C++ library
@@ -128,6 +129,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(sweng452w src/sweng452w.cpp)
+
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -147,6 +149,7 @@ add_executable(sweng452w src/sweng452w.cpp)
 ## Specify libraries to link a library or executable target against
  target_link_libraries(sweng452w
    ${catkin_LIBRARIES}
+   
  )
 
 #############
