@@ -10,7 +10,7 @@ NetworkConfig::NetworkConfig(QWidget *parent) :
     // Default IP Address
     this->clinetIPAdrr = "10.0.0.223";
     this->clientPort = 3390;
-    this->serverPort = 9050;
+    this->serverPort = 9000;
     this->isRCUpdatedVar = false;
     this->isServerPortVar = false;
     this->isRCPortVar = false;

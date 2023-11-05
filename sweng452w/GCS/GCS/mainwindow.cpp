@@ -239,7 +239,7 @@ void MainWindow::sendCMD(){
     clientSocketObj->connectToHost(networkOptions->getClientIP(), networkOptions->getClientPort());
 
     // Error checking the connection to host
-    if(!clientSocketObj->waitForDisconnected(3000))
+    if(!clientSocketObj->waitForDisconnected(100))
     {
         ui->TelemetryWidget->addItem("Error: " + clientSocketObj->errorString());
         //this->mainWindowObj->textToWidgets("Error: " + clientSocketObj->errorString(), 1);
@@ -284,6 +284,7 @@ void MainWindow::bytesWritten(qint64 bytes)
 void MainWindow::readyRead()
 {
    ui->TelemetryWidget->addItem("Received msg from RC: " + clientSocketObj->readAll());
+   clientSocketObj->flush();
    //this->mainWindowObj->textToWidgets("Received msg from RC: " + clientSocketObj->readAll(), 1);
 }
 
@@ -317,13 +318,13 @@ void MainWindow::newConnection()
 {
     QTcpSocket *connSocket = serverSocket->nextPendingConnection();
     connect(connSocket, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
-
+    connSocket->flush();
     //socket->write("hello client\r\n");
     //connSocket->flush();
 
-    connSocket->waitForBytesWritten(3000);
-
     ui->TelemetryWidget->addItem("Connected to RC Car - awaiting payload...");
+
+    connSocket->waitForBytesWritten();
 /*
     if(connSocket->bytesAvailable()){
         QString inputData = connSocket->readAll();
@@ -337,23 +338,26 @@ void MainWindow::newConnection()
     }
 */
     //connSocket->close();
+    connSocket->flush();
 }
 
 void MainWindow::onReadyRead()
 {
     QTcpSocket* sender = static_cast<QTcpSocket*>(QObject::sender());
+    sender->flush();
     //QByteArray datas = sender->readAll();
-    if(sender->bytesAvailable()){
+    //if(sender->bytesAvailable()){
         QString inputData = sender->readAll();
-        if(inputData != "HeatBeat"){
+        if(inputData != "HeartBeaT"){
             ui->TelemetryWidget->addItem(inputData);
             //this->mainWindowObj->textToWidgets(inputData, 1);
         } else {
             heartBeat++;
         }
-    }
+    //}
 
-    sender->close();
+    //sender->close();
+    sender->flush();
 
     //ui->TelemetryWidget->addItem(sender->readAll());
 
