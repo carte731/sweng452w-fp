@@ -8,6 +8,7 @@
 // QT C++ includes
 #include <QDir>
 #include <QFile>
+#include <QTimer>
 #include <QString>
 #include <QIODevice>
 #include <QTcpSocket>
@@ -57,6 +58,10 @@ public:
     void textToWidgets(QString text, int widget);
     ~MainWindow();
 
+    // Timer
+    QTimer *timer;
+    void timerHandler();
+
 private slots:
     void on_action_Open_CMD_file_triggered();
     void startTaskOperations();
@@ -67,6 +72,7 @@ private slots:
     void printCommands();
     void on_StartCmdButton_clicked();
     void on_realTimeMode_clicked();
+    void on_action_Network_Config_triggered();
 
     // Client Socket
     void clientInit();
@@ -80,9 +86,6 @@ private slots:
     void serverInit();
     void newConnection();
     void onReadyRead();
-
-
-    void on_action_Network_Config_triggered();
 
 private:
     Ui::MainWindow *ui;

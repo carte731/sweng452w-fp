@@ -17,6 +17,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     this->serverInit();
     this->isRealTime = false;
 
+    // Create Timer
+    timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &MainWindow::timerHandler);
 }
 
 MainWindow::~MainWindow()
@@ -353,6 +356,8 @@ void MainWindow::onReadyRead()
             //this->mainWindowObj->textToWidgets(inputData, 1);
         } else {
             heartBeat++;
+            // 1 minute failure
+            timer->start(60000);
         }
     //}
 
@@ -367,4 +372,8 @@ void MainWindow::onReadyRead()
     //}
 
      //sender->close();
+}
+
+void MainWindow::timerHandler(){
+    ui->TelemetryWidget->addItem("HeartBeat failure...");
 }
