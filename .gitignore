@@ -2,3 +2,10 @@
 /turtlebot3
 /turtlebot3_msgs
 /turtlebot3_simulations
+
+# Ignore GCS build files
+/sweng452w/GCS/build-GCS-Desktop-Debug
+
+# Ignore QT user profile file
+/sweng452w/GCS/GCS/GCS.pro.user
+/sweng452w/GCS/GCS/mainwindow.h.autosave
