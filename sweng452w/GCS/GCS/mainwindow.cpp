@@ -1,9 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-// Heartbeat for RC connection
-int heartBeat = 0;
-
 // Command queue
 std::queue<QString> commandQueue;
 
@@ -18,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     this->isRealTime = false;
 
     // Create Timer
-    timer = new QTimer(this);
+    this->timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &MainWindow::timerHandler);
 }
 
@@ -47,29 +44,37 @@ void MainWindow::on_action_Open_CMD_file_triggered()
 
     // Opens the file explorer at the home path
     QString filePath = QFileDialog::getOpenFileName(this, "Opening Command Execution File.", QDir::homePath(), filter);
-    QFile cmdFile(filePath);
 
-    // Error checking in command execution file
-    if(!cmdFile.open(QFile::ReadOnly | QFile::Text)){
-        QMessageBox::warning(this, "File I/O Error", "Error opening command file");
-    }
+    if(filePath.length() > 0){
 
-    // Opening file stream for processing
-    QTextStream fileIn(&cmdFile);
-    QString fileText;
+        QFile cmdFile(filePath);
 
-    // Streaming off file line-by-line and saving
-    // the command to a queue.
-    while(!fileIn.atEnd()){
-        fileText = QString(fileIn.readLine());
-        commandQueue.push(fileText);
-    }
+        // Error checking in command execution file
+        if(!cmdFile.open(QFile::ReadOnly | QFile::Text)){
+            QMessageBox::warning(this, "File I/O Error", "Error opening command file");
+        }
 
-    if(!this->isRealTimeMode()){
-        this->printCommands();
+
+        // Opening file stream for processing
+        QTextStream fileIn(&cmdFile);
+        QString fileText;
+
+        // Streaming off file line-by-line and saving
+        // the command to a queue.
+
+        while(!fileIn.atEnd()){
+            fileText = QString(fileIn.readLine());
+            commandQueue.push(fileText);
+        }
+
+        if(!this->isRealTimeMode()){
+            this->printCommands();
+        } else {
+            this->printCommands();
+            this->startTaskOperations();
+        }
     } else {
-        this->printCommands();
-        this->startTaskOperations();
+        ui->TelemetryWidget->addItem("No Command file selected");
     }
 
 }
@@ -355,9 +360,10 @@ void MainWindow::onReadyRead()
             ui->TelemetryWidget->addItem(inputData);
             //this->mainWindowObj->textToWidgets(inputData, 1);
         } else {
-            heartBeat++;
+            this->heartBeat++;
+            this->heartBeatFailures = 0;
             // 1 minute failure
-            timer->start(60000);
+            this->timer->start(60000);
         }
     //}
 
@@ -375,5 +381,9 @@ void MainWindow::onReadyRead()
 }
 
 void MainWindow::timerHandler(){
-    ui->TelemetryWidget->addItem("HeartBeat failure...");
+    this->heartBeatFailures++;
+    // four consecutive failues
+    if(this->heartBeatFailures >= 4){
+        ui->TelemetryWidget->addItem("HEARTBEAT FAILURE...");
+    }
 }

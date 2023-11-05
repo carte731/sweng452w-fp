@@ -89,6 +89,9 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    // Heartbeat for RC connection
+    int heartBeat = 0;
+    int heartBeatFailures;
     NetworkConfig *networkOptions;
     QTcpServer *serverSocket;
     QTcpSocket *clientSocketObj;
