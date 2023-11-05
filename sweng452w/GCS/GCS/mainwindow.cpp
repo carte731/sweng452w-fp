@@ -11,33 +11,12 @@ std::queue<QString> commandQueue;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow){
     ui->setupUi(this);
+
+    networkOptions = new NetworkConfig(this);
     this->clientInit();
     this->serverInit();
     this->isRealTime = false;
-    //this->on_realTimeMode_clicked();
-    // Transform generic object to ServerSocket & ClientSocket classes
-    //telemServer = qobject_cast<ServerSocket *>(telemServer);
-    //clientSocketCMD = qobject_cast<ClientSocket *>(clientSocketCMD);
 
-    ////ServerSocket serverUpcast;
-    ///ClientSocket clientUpcast;
-
-    //serverUpcast->setUp(this);
-    //clientUpcast->setUp(this);
-
-    ////this->telemServer = &serverUpcast;
-    ////this->clientSocketCMD = &clientUpcast;
-
-    //telemServer = new ServerSocket();
-    //clientSocketCMD = new ClientSocket();
-
-    //telemServer->setUp(this);
-    //clientSocketCMD->setUp(this);
-
-    //ServerSocket *ptr = dynamic_cast<ServerSocket*>(this->telemServer);
-    // if(ptr) {
-    //  std::cout << "WORKS" << endl;
-    //}
 }
 
 MainWindow::~MainWindow()
@@ -192,6 +171,38 @@ void MainWindow::on_realTimeMode_clicked()
 
 void MainWindow::on_action_Network_Config_triggered()
 {
+    networkOptions = new NetworkConfig(this);
+    networkOptions->show();
+    networkOptions->exec();
+    //networkOptions->cl
+
+    int serverUpdate = 0;
+    int RCUpdate = 0;
+
+   if(networkOptions->isRCUpdated()){
+        ui->TelemetryWidget->addItem("New RC IP Adrress assigned: " + networkOptions->getClientIP());
+        RCUpdate++;
+    }
+   if(networkOptions->isRCPortUpdated()){
+        ui->TelemetryWidget->addItem("New RC Port assigned: " +  QString::number(networkOptions->getClientPort()));
+        RCUpdate++;
+    }
+
+   if(networkOptions->isServerPortUpdated()){
+        ui->TelemetryWidget->addItem("New GCS Port assigned: " +  QString::number(networkOptions->getServerPort()));
+        serverUpdate++;
+    }
+
+   if(RCUpdate > 0){
+        this->clientInit();
+        networkOptions->setRCIPUpdate(false);
+        networkOptions->setRCPortUpdate(false);
+   }
+
+   if(serverUpdate > 0){
+        this->serverInit();
+        networkOptions->setServerPortUpdate(false);
+   }
 
 }
 
@@ -225,7 +236,7 @@ void MainWindow::sendCMD(){
     //this->mainWindowObj->textToWidgets("Connecting to RC Car...", 1);
 
     // Connecting to RC car server
-    clientSocketObj->connectToHost("10.0.0.223", 3390);
+    clientSocketObj->connectToHost(networkOptions->getClientIP(), networkOptions->getClientPort());
 
     // Error checking the connection to host
     if(!clientSocketObj->waitForDisconnected(3000))
@@ -292,7 +303,7 @@ void MainWindow::serverInit(){
     connect(serverSocket, SIGNAL(newConnection()), this, SLOT(newConnection()));
     //serverSocket->isListening();
 
-    if(!serverSocket->listen(QHostAddress::Any, 9000))
+    if(!serverSocket->listen(QHostAddress::Any, networkOptions->getServerPort()))
     {
         ui->TelemetryWidget->addItem("Telemetry server could not start!");
         //this->mainWindowObj->textToWidgets("Telemetry server could not start!", 1);
@@ -340,6 +351,7 @@ void MainWindow::onReadyRead()
         } else {
             heartBeat++;
         }
+    }
 
     sender->close();
 

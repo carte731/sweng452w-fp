@@ -174,8 +174,6 @@
     <addaction name="action_Network_Config"/>
     <addaction name="separator"/>
     <addaction name="action_Open_CMD_file"/>
-    <addaction name="action_Real_Time_Mode"/>
-    <addaction name="action_Quit"/>
    </widget>
    <addaction name="menu_File"/>
   </widget>
@@ -204,11 +202,6 @@
   <action name="action_Real_Time_Mode">
    <property name="text">
     <string>&amp;Real Time Mode</string>
-   </property>
-  </action>
-  <action name="action_Quit">
-   <property name="text">
-    <string>&amp;Quit</string>
    </property>
   </action>
  </widget>

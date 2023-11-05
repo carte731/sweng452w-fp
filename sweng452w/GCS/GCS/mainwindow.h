@@ -17,6 +17,9 @@
 #include <QTextStream>
 #include <QMessageBox>
 
+// QT second window header
+#include "networkconfig.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -79,8 +82,11 @@ private slots:
     void onReadyRead();
 
 
+    void on_action_Network_Config_triggered();
+
 private:
     Ui::MainWindow *ui;
+    NetworkConfig *networkOptions;
     QTcpServer *serverSocket;
     QTcpSocket *clientSocketObj;
     //SocketInterface *telemServer;
