@@ -393,12 +393,13 @@ public:
         if(this->isConnected == false){
             if(this->clinetInit() != 0){
                 cout << "\nFailed to connect to GCS - Telemetry failed" << endl;
-            }
-
-            if(this->clinetInit() != 0){
-                cout << "\nReconnection failed - exiting program" << endl;
                 GATE = false;
             }
+
+            //if(this->clinetInit() != 0){
+            //    cout << "\nReconnection failed - exiting program" << endl;
+            //    GATE = false;
+            //}
             return(-1);
         }
 
@@ -418,13 +419,13 @@ public:
                 if(send(client_fd, telemElement, strlen(telemElement), 0) <= -1){
                     cout << "\nError transmitting telemetry data... Attempting reconnection..." << endl;
 
-                    if(this->clinetInit() != 0){
-                        cout << "\nReconnection failed - exiting program" << endl;
-                        GATE = false;
-                    }
+                    //if(this->clinetInit() != 0){
+                    //    cout << "\nReconnection failed - exiting program" << endl;
+                    //    GATE = false;
+                    //}
                 }
 
-                //usleep(1000);
+                usleep(10000);
                 //if(read(client_fd, buffer, 1024 - 1) == -1){
                 //    cout << "Error receving confirmation of tel " << endl;
                 //}
@@ -448,9 +449,9 @@ public:
             return(-1);
         }
 
-        usleep(10000);
+        
         this->heartBeats++;
-        const char *telemElement = "HeartBeat";
+        const char *telemElement = "HeartBeaT";
         //const char *telemElement = "Heart" + this->heartBeats.data();
         if(send(client_fd, telemElement, strlen(telemElement), 0) <= -1){
             // ADD ERROR TRACKER LATER!!!
@@ -462,7 +463,8 @@ public:
             }
             return(-1);
         }
-        
+
+        usleep(10000);
         return(0);
     }
 
