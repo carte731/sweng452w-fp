@@ -1,4 +1,4 @@
-// General Includes
+// INCLUDE HEADERS
 
 // C++
 #include <string>
@@ -28,103 +28,75 @@
 
 using namespace std;
 
-// Global variables
-// Gate for main loops, 
+// GLOBAL VARIABLES
+
+// Gate for main loops and 
 // quit command comes from GCS
 bool GATE = true;
 
-//char semROS[] = "Sem-ROS";
-//char semROS[] = "Sem-CMD";
-
+// Semaphores that allow for interrupts in main loop
 sem_t ROScontrol, cmdControl; 
 
-// The telemetry struct
-//typedef struct telemetryPacket {
-typedef class telemetryPacket {
-public:
-    // Time
-    string execTime;
-
-    // Orientation
-    string orientationX;
-    string orientationY;
-    string orientationZ;
-    string orientationW;
-
-    // Angular Velocity
-    string angularVelocityX;
-    string angularVelocityY;
-    string angularVelocityZ;
-
-    // Linear Acceleration
-    string linearAccelX;
-    string linearAccelY;
-    string linearAccelZ;
-
-    vector<string> structContents;
-     
-    void addToVector(){
-        structContents.push_back(this->execTime);
-        structContents.push_back(this->orientationX);
-        structContents.push_back(this->orientationY);
-        structContents.push_back(this->orientationZ);
-        structContents.push_back(this->orientationW);
-        structContents.push_back(this->angularVelocityX);
-        structContents.push_back(this->angularVelocityY);
-        structContents.push_back(this->angularVelocityZ);
-        structContents.push_back(this->linearAccelX);
-        structContents.push_back(this->linearAccelY);
-        structContents.push_back(this->linearAccelZ);
-    };
-
-} teleMsg;
-
 // Telemetry data vector from vehicle
-//vector<teleMsg> telemVector;
-queue<teleMsg> telemVector;
+// Contains vehicle IMU data
+queue<string> telemVector;
 
+// Controls the ROS robot 
 class ROSMovementController {
 private:
+    // Node the holds the program
     ros::NodeHandle nh;
+    // The publisher that sends messages to software bus
     ros::Publisher pub;
-    //ros::Rate loop_rate(2);
+    // Used for movement message to ROS
     geometry_msgs::Twist speed;
 
 public:
 
-    //void ROSTelemtryInit(Telemetry *teleObj);
-
     // CONSTRUCTOR, and INITIALIZERS
     ROSMovementController(){
+        // Tells ROS movement messages will be sent out of this program
         pub = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 100);
-        //this->init();
     }
 
-    void init(){
-        pub = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 100);
-        //loop_rate::Rate(2);
-    }
 
     // METHODS
+    // Moves the vehicle at saved speed
     void publishSpeed(){
+        // The frame cycle rate for movement commands
         ros::Rate loop_rate(2);
+        // Publish the message to the ROS robot
         pub.publish(this->speed);
+        // Once command has been excuted, don't wait until 
+        // frame cycle is over - this just ends it then
         ros::spinOnce();
+        // Sleep until more commands
         loop_rate.sleep();
         
     }
 
     // GETTERS
+    // Returns current forward and reverse speeds
+    double getLinearX(){
+        return(this->speed.linear.x);
+    }
+
+    double getAngularZ(){
+        return(this->speed.angular.z );
+    }
 
     // SETTERS
+    // Sets direction by setting speed of robot vehicle
     void setDirection(double linerX, double angularZ){
-        speed.linear.x = linerX;
-        speed.angular.z = angularZ;
+        this->speed.linear.x = linerX;
+        this->speed.angular.z = angularZ;
     }
 
 };
 
-class NetworkController {
+// Receives commands from Ground Control Station (GCS)
+// It's a server that waits and listens for inbound commands
+class CommandServer {
 private:
     // Socket Variables
     int portNum = 0;
@@ -137,12 +109,13 @@ private:
 	const char* confirmation = "Command Message Recevied by Server";
 
     // ROS Object Instance
+    // Once moves have been translated, this moves the robot
     ROSMovementController ROSMove;
 
 public:
 
     // CONSTRUCTOR, DESTUCTOR and INITIALIZERS
-    NetworkController(int inputPort){
+    CommandServer(int inputPort){
         // Assigning Port number for server
         this->portNum = inputPort;
 
@@ -150,15 +123,18 @@ public:
         this->init();
     }
 
-    NetworkController(){
+    CommandServer(){
         // Default port number
-        this->portNum = 3390;
+        // Varialbe pulled from environmental variable
+        // in config bash script
+        char* tempPort = getenv("CMD_PORT");
+        this->portNum = atoi(tempPort);
 
         // Initializing server
         this->init();
     }
 
-    ~NetworkController(){
+    ~CommandServer(){
         // closing the connected socket
 	    close(new_socket);
 
@@ -166,33 +142,33 @@ public:
         close(server_fd);
     }
 
+    // Sets up input command server
     void init(){
+
         // Creating socket file descriptor
         if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
             perror("socket failed");
             exit(EXIT_FAILURE);
         }
 
-        // Forcefully attaching socket to the port 3390
-        if (setsockopt(server_fd, SOL_SOCKET,
-                    SO_REUSEADDR | SO_REUSEPORT, &opt,
-                    sizeof(opt))) {
+        // Attaching socket to the port specified in config file
+        if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
             perror("setsockopt");
             exit(EXIT_FAILURE);
         }
 
+        // Filling address struct
         address.sin_family = AF_INET;
         address.sin_addr.s_addr = INADDR_ANY;
         address.sin_port = htons(portNum);
         
-        // Forcefully attaching socket to the port 3390
-        if (bind(server_fd, (struct sockaddr*)&address,
-                sizeof(address))
-            < 0) {
+        // Attaching socket to the port specified in config file
+        if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) < 0) {
             perror("bind failed");
             exit(EXIT_FAILURE);
         }
 
+        // Start listening for input
         if (listen(server_fd, 3) < 0) {
             perror("listen");
             exit(EXIT_FAILURE);
@@ -201,51 +177,72 @@ public:
     }
 
     // METHODS
-
+    // Runs on a seperate thread, waits for signal from GCS
     void threadServer(){
         std::string word;
 		std::stringstream stream;
+        // Waits for any new connection, only closes when the quie command is entered
 		while ((GATE) && (new_socket = accept(server_fd, (struct sockaddr*)&address, &addrlen))){ 
+            // This semaphore allows the input commands to interrupt the 
+            // standard heartbeat and telemetry data outputs to the GCS.
+            // This allows me to create a "Round Robin" with interrupts scheduler
 			sem_wait(&cmdControl);
 			sleep(1);
 
-
+            // clears out buffer for command input
 			bzero(buffer, sizeof(buffer));
 			
+            // Check socket binding
 			if (new_socket < 0) {
 				perror("accept");
 				exit(EXIT_FAILURE);
 			}
 
-			while((GATE) && (valread = read(new_socket, buffer,1024 - 1))){ 
-				// subtract 1 for the null
-				// terminator at the end
+            // Receives command from GCS
+            read(new_socket, buffer, 1024 - 1);
 
-				//printf("%s\n", buffer);
-				std::string word(buffer);
-                cout << word << endl;
+            // Converts const char into string
+            std::string word(buffer);
+            // Prints command - mostly used for testing
+            cout << word << endl;
 
-                this->translationUnit(word);
-				GATE = (word != "QUIT") ? true : false;
+            // Checks if command input from GCS is valid
+            // Mostly needed for command file input
+            this->translationUnit(word);
 
-				bzero(buffer, sizeof(buffer));
-				write(new_socket, confirmation, strlen(confirmation));
-			}
+            // If the user wants to quit, then it
+            // exits the loop and program
+            GATE = (word != "QUIT") ? true : false;
 
+            // Clears the server input buffer
+            bzero(buffer, sizeof(buffer));
+
+            // Writes the confirmation message back to GCS
+            write(new_socket, confirmation, strlen(confirmation));
+
+            // Used for debugging and testing
 			cout << "Command confirmation message sent" << endl;
 
+            // Release both semaphores, so the main Round Robin loop
+            // can continue to execute
+            sem_post(&ROScontrol);
 			sem_post(&cmdControl);
 		}
     }
 
+    // Checks if command input from GCS is valid,
+    // If so issue order to ROS Controller object to move the robot.
+    // Otherwise just ignore the command. 
     void translationUnit(string userInput){
-        //switch (userInput)
-        //{
         if (userInput == "UP"){
+            // Standard movement forward
             ROSMove.setDirection(.5, 0);
+            // Move the robot vehicle
             ROSMove.publishSpeed();
-
+            // Sleep to clear ROS buffers
             usleep(500000);
+
+            // Tell the ROS robot to stop moving
             ROSMove.setDirection(0, 0);
             ROSMove.publishSpeed();
         } else if(userInput == "DOWN"){
@@ -258,111 +255,106 @@ public:
         }
     }
 
-    // GETTERS
-
-    // SETTERS
-    
+    // Gets the port number for the server
     int getPort(){
         return(this->portNum);
     }
+
 };
 
-class Telemetry{
+// Used for sending the heartbeat and telemetry 
+// to the GCS. The heartbeat lets the GCS know that there is a 
+// connection (when there are no movements).
+// The telemetry tracks the Inertial Measurement Unit (IMU) on the
+// vehicle (tracks speed, angular rate and orientation of robot vehicle)
+class TelemetryClient{
 private:
     // Socket Variables
     int portNum = 0;
     string ipAddr = "";
-    bool isConnected = false;
-	int valread, client_fd;
+	int client_fd;
 	struct sockaddr_in serv_addr;
-	char buffer[1024] = { 0 };
 
-    // ROS Object Instance
-    //ROSMovementController ROSMove;
+    // Tracks if there is a connection between
+    // the RC robot and the GCS
+    bool isConnected = false;
+
+    // Tracks how many heartbeats were sent
     int heartBeats = 0;
-    
 
 public:
 
-    Telemetry(string inputIPAddr, int inputPortNum){
+    TelemetryClient(string inputIPAddr, int inputPortNum){
         this->ipAddr = inputIPAddr;
         this->portNum = inputPortNum;
-        if(this->clinetInit() != 0){
+        if(this->clientInit() != 0){
             this->isConnected = false;
             cout << "Error establishing telemetry bridge to GCS..." << endl;
             
         }
-
-        //ROSTelemtryInit(this);
     }
 
-    Telemetry(){
-        // My VM IP Address (Using a network bridge)
-        this->ipAddr = "10.0.0.101";
-        this->portNum = 9000;
+    // CONSTRUCTOR, DESTUCTOR and INITIALIZERS
+    TelemetryClient(){
+        // Grabs networking variables from config file
+        // Saved as char array
+        char* tempIP = std::getenv("GCS_IPADDR");
+        char* tempPort = std::getenv("GCS_PORT");
         
-        if(this->clinetInit() != 0){
+        // Converted from char to string and int
+        this->ipAddr = tempIP;
+        this->portNum = atoi(tempPort);
+        
+        // Initializes connect with GCS
+        if(this->clientInit() != 0){
             this->isConnected = false;
             cout << "Error establishing telemetry bridge to GCS..." << endl;
 
         }
-
-        //ROSTelemtryInit(this);
-
     }
 
-    ~Telemetry(){
+    ~TelemetryClient(){
         this->closeConnection();
     }
 
+    // A handler for inbound ROS IMU messages from RC robot vehicle
+    // Saves them output to a string and it's pushed to a queue to be
+    // outprocessed to the GCS telemetry window. 
     void processImnTelemetry(const sensor_msgs::Imu::ConstPtr& msg){
-        teleMsg newMSg;
+        string newMSg;
 
-        newMSg.execTime = "Time-Stamp/ID: " + to_string(msg->header.stamp.sec) + "\n";
+        // Header for GCS print-out of widget
+        newMSg = "\n\n----------- INBOUND IMU DATA --------------\n";
 
-        newMSg.orientationX = "orientation X: " + to_string(msg->orientation.x) + "\n";
-        newMSg.orientationY = "orientation Y: " + to_string(msg->orientation.y) + "\n";
-        newMSg.orientationZ = "orientation Z: " + to_string(msg->orientation.z) + "\n";
-        newMSg.orientationW = "orientation W: " + to_string(msg->orientation.w) + "\n";
+        // Grabs the data from the message
+        newMSg += "Time-Stamp/ID: " + to_string(msg->header.stamp.sec) + "\n";
 
-        newMSg.angularVelocityX = "Angular Velocity X: " + to_string(msg->angular_velocity.x) + "\n";
-        newMSg.angularVelocityY = "Angular Velocity Y: " + to_string(msg->angular_velocity.y) + "\n";
-        newMSg.angularVelocityZ = "Angular Velocity Z: " + to_string(msg->angular_velocity.z) + "\n";
+        newMSg += "orientation X: " + to_string(msg->orientation.x) + "\n";
+        newMSg += "orientation Y: " + to_string(msg->orientation.y) + "\n";
+        newMSg += "orientation Z: " + to_string(msg->orientation.z) + "\n";
+        newMSg += "orientation W: " + to_string(msg->orientation.w) + "\n";
 
-        newMSg.linearAccelX = "Linear Acceleration X: " + to_string(msg->linear_acceleration.x) + "\n";
-        newMSg.linearAccelY = "Linear Acceleration Y: " + to_string(msg->linear_acceleration.y) + "\n";
-        newMSg.linearAccelZ = "Linear Acceleration Z: " + to_string(msg->linear_acceleration.z) + "\n";
+        newMSg += "Angular Velocity X: " + to_string(msg->angular_velocity.x) + "\n";
+        newMSg += "Angular Velocity Y: " + to_string(msg->angular_velocity.y) + "\n";
+        newMSg += "Angular Velocity Z: " + to_string(msg->angular_velocity.z) + "\n";
+
+        newMSg += "Linear Acceleration X: " + to_string(msg->linear_acceleration.x) + "\n";
+        newMSg += "Linear Acceleration Y: " + to_string(msg->linear_acceleration.y) + "\n";
+        newMSg += "Linear Acceleration Z: " + to_string(msg->linear_acceleration.z) + "\n";
+
+        newMSg += "----------- END OF IMU DATA ---------------\n\n";
         
-        //cout << "Linear Acceleration: " << msg->linear_acceleration.x << endl;
-        cout << "IMU Added..." << endl;
+        cout << "IMU Added to buffer..." << endl;
 
-        newMSg.addToVector();
-
-        // Used for testing
-        //printTelemtry(newMSg);
-
-        // Add Mutex and semaphore here
-        //telemVector.push_back(newMSg);
+        // Adds data to vector
         telemVector.push(newMSg);
     }
 
-    // Used for testing
-    void printTelemtry(teleMsg newMSg){
-
-       for(auto element : newMSg.structContents){
-            cout << element << endl;
-       }
-    }
-
-    int clinetInit(){
+    // Initializes the client socket to GCS
+    int clientInit(){
+        // Socket creation
         if ((client_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
             cout << "Socket creation error" << endl;
-
-            if(this->clinetInit() != 0){
-                cout << "\nReconnection failed - exiting program" << endl;
-                GATE = false;
-            }
-            return(-1);
         }
 
         serv_addr.sin_family = AF_INET;
@@ -372,92 +364,85 @@ public:
         const char *ipAddress = this->ipAddr.data();
         if (inet_pton(AF_INET, ipAddress, &serv_addr.sin_addr) <= 0) {
             cout << "Invalid address/ Address not supported \n" << endl;
-
-            if(this->clinetInit() != 0){
-                cout << "\nReconnection failed - exiting program" << endl;
-                GATE = false;
-            }
-            return(-1);
         }
 
+        // Initial connection to GCS server
         if (connect(client_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
             cout << "Connection Failed..." << endl;
             return(-1);
         }
 
+        // Tells otehr methods that connection was successful
         this->isConnected = true;
         return(0);
     }
 
+    // Sends IMU telemetry data to GCS
     int sendTelemetry(){
+        // Checks if the connection is active
         if(this->isConnected == false){
-            if(this->clinetInit() != 0){
-                cout << "\nFailed to connect to GCS - Telemetry failed" << endl;
+            // Reattempts connection, if it fails
+            // then the program exits
+            if(this->clientInit() != 0){
+                cout << "\nFailed to connect to GCS - Telemetry failed to send" << endl;
                 GATE = false;
             }
 
-            //if(this->clinetInit() != 0){
-            //    cout << "\nReconnection failed - exiting program" << endl;
-            //    GATE = false;
-            //}
             return(-1);
         }
 
+        // If the IMU telemetry vector is not empty, 
+        // then send the data to the GCS.
+        // One message is sent per frame cycle in the
+        // Round Robin with interrupts.
         if(!telemVector.empty()){
-            //teleMsg newMSg = telemVector[0];
-            //telemVector.erase(telemVector.begin());
+            
+            // Grab and remove message and send it
+            string newMSg = telemVector.front();
+            telemVector.pop();  
 
-            teleMsg newMSg = telemVector.front();
-            telemVector.pop();          
+            const char *sendMsg = newMSg.data();      
 
-            // Add Mutex and semaphore here
-            //cout << "Presend" << endl;
-            for(auto element : newMSg.structContents){
-                const char *telemElement = element.data();
-                //const char *telemElement = "\nSERVER-TEST\n";
-                //write(client_fd, test, strlen(test));
-                if(send(client_fd, telemElement, strlen(telemElement), 0) <= -1){
-                    cout << "\nError transmitting telemetry data... Attempting reconnection..." << endl;
+            if(send(client_fd, sendMsg, strlen(sendMsg), 0) <= -1){
+                cout << "\nError transmitting telemetry data..." << endl;
 
-                    //if(this->clinetInit() != 0){
-                    //    cout << "\nReconnection failed - exiting program" << endl;
-                    //    GATE = false;
-                    //}
+                if(this->clientInit() != 0){
+                    cout << "\nReconnection failed - exiting program" << endl;
+                    GATE = false;
                 }
-
-                usleep(10000);
-                //if(read(client_fd, buffer, 1024 - 1) == -1){
-                //    cout << "Error receving confirmation of tel " << endl;
-                //}
-
-                //printf("%s\n\n", buffer);
-
+                return(-1);
             }
+            cout << "IMU DATA SENT" << endl;
+            usleep(1000);
 
-            //cout << "Telemetry messages sent..." << endl;
         }
 
         return(0);
     }
 
+    // Sends heartbeat to the GCS
+    // Lets the GCS know that the two systems are 
+    // still connected and active.
+    // If GCS doesn't receive a heartbeat in 4 minutes,
+    // then the connection is cut.
     int sendHeartBeat(){
+        // Double checks if system is still connected to the
+        // GCS
         if(this->isConnected == false){
-            if(this->clinetInit() != 0){
+            if(this->clientInit() != 0){
                 cout << "\nFailed to connect to GCS - Telemetry failed" << endl;
             }
 
             return(-1);
         }
 
-        
+        // Sends the heartbeat to the GCS 
         this->heartBeats++;
         const char *telemElement = "HeartBeaT";
-        //const char *telemElement = "Heart" + this->heartBeats.data();
         if(send(client_fd, telemElement, strlen(telemElement), 0) <= -1){
-            // ADD ERROR TRACKER LATER!!!
             cout << "\nError sending heart-beat... Attempting reconnection..." << endl;
 
-            if(this->clinetInit() != 0){
+            if(this->clientInit() != 0){
                 cout << "\nReconnection failed - exiting program" << endl;
                 GATE = false;
             }
@@ -468,19 +453,23 @@ public:
         return(0);
     }
 
+    // Closed the client socket
+    // used for object deconstructor
     void closeConnection(){
         // closing the connected socket
         close(client_fd);
 
     }
 
+    // Alternates between heartbeats and sending available IMU
+    // data. Used for the Round-Robin functionalty
     void dataExecution(int itr){
         switch(itr % 1000){
             case(0):
                 //cout << "Sending Heat-Beat..." << endl;
                 this->sendHeartBeat();
                 break;
-            case(1):
+            default:
                 //cout << "Sending Telemetry..." << endl;
                 this->sendTelemetry();
                 break;
@@ -488,4 +477,13 @@ public:
     }
 
 };
+
+// Container class used for organization
+// Holds all the objects
+typedef class NetworkInterfaceController {
+public:
+    CommandServer CMDServer;
+    TelemetryClient TelemServer;
+
+} NIC;
 
