@@ -9,3 +9,6 @@
 # Ignore QT user profile file
 /sweng452w/GCS/GCS/GCS.pro.user
 /sweng452w/GCS/GCS/mainwindow.h.autosave
+
+# Ignore Visual Studio Code project files
+.vscode/
