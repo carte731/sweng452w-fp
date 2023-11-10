@@ -93,6 +93,9 @@
    <property name="inputMask">
     <string>000.000.000.000;_</string>
    </property>
+   <property name="text">
+    <string extracomment="If IP address isn't 3 digits, place value to the furestest right.">...</string>
+   </property>
   </widget>
   <widget class="QSpinBox" name="RCPort">
    <property name="geometry">

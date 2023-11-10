@@ -244,7 +244,7 @@ void MainWindow::on_action_Network_Config_triggered()
 
     // Checks if the RC car/robot IP address has changed
     if(networkOptions->isRCUpdated()){
-        ui->TelemetryWidget->addItem("New RC IP Adrress assigned: " + networkOptions->getClientIP());
+        ui->TelemetryWidget->addItem("New RC IP Address assigned: " + networkOptions->getClientIP());
         RCUpdate++;
     }
 
