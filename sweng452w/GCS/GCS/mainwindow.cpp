@@ -101,7 +101,6 @@ void MainWindow::startTaskOperations(){
     while(!commandQueue.empty()) {
         // Sends command to RC car
         this->sendCMD();
-        usleep(1000);
 
         // Refreshes the command queue widget window
         this->printCommands();
@@ -200,7 +199,6 @@ void MainWindow::on_StartCmdButton_clicked(){
         this->startTaskOperations();
     } else {
         this->sendCMD();
-        this->printCommands();
     }
 }
 
