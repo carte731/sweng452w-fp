@@ -12,3 +12,9 @@
 
 # Ignore Visual Studio Code project files
 .vscode/
+
+# Ignore YahBoom real-time mode controller drivers
+/real_mode/Driver_installer/dist
+/real_mode/Driver_installer/build
+/real_mode/Driver_installer/Rosmaster_Lib.egg-info
+/real_mode/Driver_installer/dist/Rosmaster_Lib-1.7.3-py3.8.egg
