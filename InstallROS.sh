@@ -1,5 +1,7 @@
 #!/bin/bash
 
+### INSTALL ROS-NOETIC ###
+
 # Setup your sources.list - Setup your computer to accept software from packages.ros.org.
 echo "\nSetting up source listing to accept ROS packages\n"
 sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
@@ -40,7 +42,10 @@ sudo apt-get install python3-rosdep -y
 
 # Update Ros-Dep for python
 echo "\nUpdaing Python-ROS\n"
+sudo rosdep init
 rosdep update
+
+### SETTING UP ROS WORKSPACE ###
 
 # Making ROS operations directory
 echo "\n Creating ROS workspace directory structure\n"
@@ -55,6 +60,8 @@ catkin_init_workspace
 echo "\nBuilding ROS workspace\n"
 cd ..
 catkin_make
+
+### INSTALLING PROJECT ###
 
 # Copying workspace 
 echo "\nGIT cloning an additional copy of SWENG project to new ROS workspace\n"
@@ -82,6 +89,8 @@ cd -
 # Build with the new ROS workspace
 echo "\nBuilding the new ROS workspace with SWENG project files\n"
 catkin_make
+
+### EXIT MESSAGE ###
 
 # Exit message
 echo "\n\nPROJECT INSTALL COMPLETE..."
