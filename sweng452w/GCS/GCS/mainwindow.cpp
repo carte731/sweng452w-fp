@@ -303,7 +303,7 @@ void MainWindow::sendCMD(){
 
     // Error checking the connection to host
     if(!clientSocketObj->waitForDisconnected(100)){
-        ui->TelemetryWidget->addItem("Error: " + clientSocketObj->errorString());
+        ui->TelemetryWidget->addItem("Command TimeOut: " + clientSocketObj->errorString());
     }
 
     // Flush the client buffer
