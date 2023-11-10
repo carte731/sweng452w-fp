@@ -24,35 +24,14 @@
 namespace Ui {
 class MainWindow;
 }
-/*
-class SocketInterface {
 
-public:
-    SocketInterface();
-
-    // Common Socket Methods
-    virtual void init();
-    virtual void setUp();
-
-    // Client virtual methods
-    virtual void connected();
-    virtual void disconnected();
-    virtual void bytesWritten(qint64 bytes);
-    virtual void readyRead();
-    virtual void sendCMD();
-
-    // Server Virtual Methods
-    virtual void newConnection();
-
-
-};
-*/
 // Main Window Class
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
+
     Q_OBJECT
 
 public:
+    // Helper Methods
     explicit MainWindow(QWidget *parent = 0);
     void updateCMDWidget();
     void textToWidgets(QString text, int widget);
@@ -63,6 +42,7 @@ public:
     void timerHandler();
 
 private slots:
+    // Private UI methods
     void on_action_Open_CMD_file_triggered();
     void startTaskOperations();
     void on_UpCmdButton_clicked();
@@ -74,7 +54,7 @@ private slots:
     void on_realTimeMode_clicked();
     void on_action_Network_Config_triggered();
 
-    // Client Socket
+    // Client Socket Methods
     void clientInit();
     void sendCMD();
     void connected();
@@ -82,70 +62,27 @@ private slots:
     void bytesWritten(qint64 bytes);
     void readyRead();
 
-    // Server Socket
+    // Server Socket Methods
     void serverInit();
     void newConnection();
     void onReadyRead();
 
 private:
     Ui::MainWindow *ui;
-    // Heartbeat for RC connection
+
+    // Heartbeat Variables for RC connection
     int heartBeat = 0;
     int heartBeatFailures;
+
+    // Controls Real-Time Mode
+    bool isRealTime;
+
+    // Internal objects that control
+    // network communications with the RC car/robot
     NetworkConfig *networkOptions;
     QTcpServer *serverSocket;
     QTcpSocket *clientSocketObj;
-    //SocketInterface *telemServer;
-    //SocketInterface *clientSocketCMD;
-    bool isRealTime;
-};
-/*
-// TCP-Client Class
-class ClientSocket : public SocketInterface, public QObject{
-
-    Q_OBJECT
-
-public:
-    explicit ClientSocket(QObject *parent = 0);
-    //void setUp(MainWindow *inputWindowObj);
-    void init();
-    void sendCMD();
-
-signals:
-public slots:
-    void connected();
-    void disconnected();
-    void bytesWritten(qint64 bytes);
-    void readyRead();
-    MainWindow getMainWindow();
-
-private:
-    //MainWindow *mainWindowObj;
-    QTcpSocket *clientSocketObj;
 
 };
 
-// TCP-Server Class
-class ServerSocket : public SocketInterface, public QObject {
-
-    Q_OBJECT
-
-public:
-
-    explicit ServerSocket(QObject *parent = 0);
-    //void setUp(MainWindow *inputWindowObj);
-    void init();
-    MainWindow getMainWindow();
-
-signals:
-
-public slots:
-    void newConnection();
-
-private:
-    //MainWindow *mainWindowObj;
-    QTcpServer *serverSocket;
-
-};
-*/
 #endif // MAINWINDOW_H
