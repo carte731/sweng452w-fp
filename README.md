@@ -3,6 +3,8 @@ This repo contains the final project for SWENG-452W. I created a Remote Controll
 
 There are two modes for this software: simulation (sim) and real hardware (real) modes. This README will cover and provide resouces on how to set-up both environments and the GCS for testing and/or operations.
 
+![RC Car front glam shot](README_Supps/RCFront.jpg)
+
 # The Simulation-Mode Set-Up
 The sim-mode allows for development and testing of the remote control system without having to mount to actual hardware. This allowed me to save time and money in development. Currently the project uses [Gazebo](https://gazebosim.org/home) as the simulator of choice and [Windows System for Linux 2](https://learn.microsoft.com/en-us/windows/wsl/about) (WSL2) to run ROS and Gazebo for simulator operations. This section will cover how to set-up a simulator environment and the GCS.
 
@@ -48,7 +50,7 @@ If you receive a Windows firewall error, create a `Inbound Rule` for your WSL2 p
 
 In the firewall program, select `Inbound Rules` and select `New Rule..`.
 
-![Alt text](README_Supps/fire2.png)
+![New Rules](README_Supps/fire2.png)
 
 Follow these settings for the `New Inbound Rule Wizard`:
 - **Rule Type**: Port
@@ -187,11 +189,11 @@ Insert SD card into PC. There are three sections that must be fill out, enter th
 
 **_IMPORTANT_: AFTER SELECTING `NEXT`, THEN SELECT `EDIT SETTINGS` AND APPLY YOUR NETWORK SETTINGS AND ENABLE SSH.**
 
-![Alt text](README_Supps/raspGen.png)
+![Pi Imager General](README_Supps/raspGen.png)
 
 **_IMPORTANT_: FOR THE GENERAL TAB - ENTER YOUR NETWORK INFORMATION, DON'T COPY WHAT IS PRESENTED IN THE EXAMPLE IMAGE**
 
-![Alt text](README_Supps/raspSSH.png)
+![Pi Imager Services](README_Supps/raspSSH.png)
 
 **_IMPORTANT_: FOR THE SSH TAB - APPLY THE SAME SETTINGS**
 
@@ -242,7 +244,7 @@ Follow these links to learn how:
 # The Ground Control Station (GCS)
 The GCs send commands to the RC car/robot from another computer or VM running Linux (Generally Ubuntu 20, but should be able to run on any OS. Other OS's haven't been tested). It runs off a GUI, that requires [ QT Creator](https://www.qt.io/product/development-tools) to run. The GCS runs off of Qt Creator 4.5.2 (later versions have not been tested).
 
-![Alt text](README_Supps/GCSMain.png)
+![GCS Main Menu](README_Supps/GCSMain.png)
 
 ## Setting up GCS
 
@@ -250,7 +252,7 @@ The GCs send commands to the RC car/robot from another computer or VM running Li
 ### Virtual Machine (VM) Set-Up
 In a VM environment of your choice create or use a Ubuntu/Linux environment. Change the network type to `bridged` for that VM.
 
-![Alt text](README_Supps/bridged.png)
+![VirtualBox Network Bridge Setting](README_Supps/bridged.png)
 
 ### Installing QT-Creator
 
@@ -335,4 +337,4 @@ The instructions are the same as with sim mode - the only difference being:
 ``` bash
 ./RCStart real
 ```
-
+![Side glam Shot of RC](README_Supps/RCSide.jpg)
