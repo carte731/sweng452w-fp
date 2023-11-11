@@ -150,8 +150,23 @@ The control board interfaces with the hardware and allows communication with the
 ### Assembly
 The Installation video provided above will show you have to assemble the chassis. The [ROS installation sub-section](#Final-Project-Installation) above will install the hardware controller drivers. 
 
-## GCS Set-up
-### Setting up GCS
+For further details, please read the material below:
+- [ROS Robot chassis repository](http://www.yahboom.net/study/ROS-chassis)
+- [ROS robot expansion board repository](http://www.yahboom.net/study/ROS-driver-Board)
+
+## GCS Set-Up
+The GCs send commands to the RC car/robot from another computer or VM running Linux (Generally Ubuntu 20, but should be able to run on any OS. Other OS's haven't been tested). It runs off a GUI, that requires [ QT Creator](https://www.qt.io/product/development-tools) to run. The GCS runs off of Qt Creator 4.5.2 (later versions have not been tested).
+
+![Alt text](README_Supps/GCSMain.png)
+
+## GCS Controls
+
+### RC Controls and Execution Mode
+There are 
+
+### Set-Up
+
+#### Setting up GCS
 In a virual machine (VM) environment of your choice create or use a Ubuntu/Linux environment. Change the network type to `bridged` for that VM.
 
 ![Alt text](README_Supps/bridged.png)
