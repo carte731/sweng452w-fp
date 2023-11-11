@@ -168,24 +168,76 @@ catkin_make
 ```
 
 # The RealTime-Mode Set-Up
+You will have to set up both the Raspberry-Pi 4 and the hardware.
+
+## Raspberry-Pi 4 
+You will need a Raspberry Pi 4 and an microSD card and a means to mount it to computer (to install an OS to the SD card).
+
+### Set-Up
+In this section you will be installing Ubuntu-20 Server. There is no GUI by default for the server versions of Ubuntu. Everything must be done through a terminal or a remote IDE like Visual Studio Code.
+
+#### Install Imager
+Download and install the [Raspberry Pi Imager](https://www.raspberrypi.com/software/). 
+#### Install Unbuntu-20 on MicroSD
+Insert SD card into PC. There are three sections that must be fill out, enter these settings:
+
+- **Raspberry Pi Device**: Raspberry Pi 4
+- **Operating Systems**: scroll down and select `Other general-purpose OS`, Select `Ubuntu` and then scroll down and select: `Ubuntu Server 20.04.5 LTS (64-bit)`.
+- **Storage**: Select your MicroSD card.
+
+**_IMPORTANT_: AFTER SELECTING `NEXT`, THEN SELECT `EDIT SETTINGS` AND APPLY YOUR NETWORK SETTINGS AND ENABLE SSH.**
+
+![Alt text](README_Supps/raspGen.png)
+
+**_IMPORTANT_: FOR THE GENERAL TAB - ENTER YOUR NETWORK INFORMATION, DON'T COPY WHAT IS PRESENTED IN THE EXAMPLE IMAGE**
+
+![Alt text](README_Supps/raspSSH.png)
+
+**_IMPORTANT_: FOR THE SSH TAB - APPLY THE SAME SETTINGS**
+
+**THIS IS _IMPORTANT_, BECAUSE YOU WILL BE ABLE TO SSH DIRECTLY INTO THE UBUNTU-20 SERVER AND WON'T HAVE TO MANUALLY CONFIGURE NETWORK SCRIPTS (IT'S A PAIN TO DO THIS).**
+
+### SSHing into Raspberry Pi for the first time
+Open your powershell **_(ensure you have openssh installed)_** and enter:
+``` powershell
+ssh [username]@[hostname].local
+```
+The `username` and `hostname` come from what you selected in the OS set-up using the imager in the last [sub-section](#install-unbuntu-20-on-microsd). 
+If this doesn't work, you will have to manually attach a monitor to the Raspberry Pi 4 to collect your IP address (Directions below) and then use this command:
+``` powershell
+ ssh [username]@[IP address]
+```
+
+### Obatining Raspberry-Pi IP address
+Find your IP address in the Pi using the commands mention in [earlier sub-sections](#find-wsl2-ip-address). **This address is important, this is what you will send commands to (from the GCS) and how you will SSH into the device normally.**
+
+## Hardware Set-Up and Configurations
 For this project, I used [YahBoom](http://www.yahboom.net/home) for my robot car chassis. They provide an assortment of chassis, boards and accessories robotics design.
 
-## Chassis
+### Chassis
 I chose the [Yahboom Aluminum Alloy ROS Robot Car Chassiss](https://category.yahboom.net/products/ros-chassis?_pos=1&_sid=4b44cf093&_ss=r&variant=44178906939708). It's a basic chassis, with just wheels and a mounting frame - the final project I created provides the drive control, so the more complex platforms were not needed. Here's a tutorial showing how to assemble the chassis: [4WD chassis Installation Video](https://youtu.be/sRYrv7y6zoY?si=ojyGAra0tV3s3jSz)
 
 ![4WD chassis](README_Supps/4WD.png)
 
-## Hardware Control Board
+### Hardware Control Board
 The control board interfaces with the hardware and allows communication with the hardware through a centerized system. I chose the [YahBoom ROS Robot Control Board](https://category.yahboom.net/products/ros-driver-board?_pos=1&_sid=f40392f38&_ss=r) - my program interfaces with the board to send drive commands to the hardware.
 
 ![STM32F103RCT6 IMU for Raspberry Pi Jetson Robotics](README_Supps/ROSControl.png)
 
-## Assembly
+### Assembly
 The Installation video provided above will show you have to assemble the chassis. The [ROS installation sub-section](#Final-Project-Installation) above will install the hardware controller drivers. 
 
 For further details, please read the material below:
 - [ROS Robot chassis repository](http://www.yahboom.net/study/ROS-chassis)
 - [ROS robot expansion board repository](http://www.yahboom.net/study/ROS-driver-Board)
+
+# Connect Visual Studio Code to Raspberry Pi and WSL2
+It is helpful to connect Visual Studio code to either the Raspberry-Pi (Real-Mode) and to WSL2  (Sim-Mode) to update config files or to experiment with the program and settings. It makes cross system development, cross-compiling a lot easier. 
+
+Follow these links to learn how: 
+- [Remote Development using SSH](https://code.visualstudio.com/docs/remote/ssh)
+- [Using C++ and WSL in VS Code](https://code.visualstudio.com/docs/cpp/config-wsl)
+- [Developing in WSL](https://code.visualstudio.com/docs/remote/wsl)
 
 # The Ground Control Station (GCS)
 The GCs send commands to the RC car/robot from another computer or VM running Linux (Generally Ubuntu 20, but should be able to run on any OS. Other OS's haven't been tested). It runs off a GUI, that requires [ QT Creator](https://www.qt.io/product/development-tools) to run. The GCS runs off of Qt Creator 4.5.2 (later versions have not been tested).
@@ -251,17 +303,17 @@ For both modes, the GCS **needs** to be started first.
 ## Running Simulation-Mode
 Open both you WSL2 and Ubuntu VM.
 
-### GCS Start-Up on VM
+### GCS Start-Up on VM (SIM)
 Start QT-Creator and press the play button *or* run the executable file (generated by QT-Creator) named GCS in the build directory. **Select `File-->Network Config` and enter the RC car/robot IP address (from WSL2). Additionally, choose a port for the GCS (default is 9000).**
 
 ![GCS Configured](README_Supps/GCSConfiged.png)
 
 Select mount to save inputs, the server should restart and the GCS is ready.
 
-### RC Car Start-Up on WSL2
+### RC Car Start-Up on WSL2 (SIM)
 In the main directory there are two files: `config.sh` and `RCStart.sh`. Config file **must** be set with correct IP and Port addresses for the VM running the GCS and the GCS Port.
 
-#### Config File
+#### Config File (SIM)
 In the main directory open the `config.sh` file and input the GCS (VM) IP address and the port you selected in the last sub-section: [GCS Start-Up](#gcs-start-up-on-vm). The RC port must match the port created in the [WSL2 port forwarding section](#WSL2-Port-Forwarding-using-Port-Proxy)
 
 Run the command below to start sim mode, put nothing in for a help print out.
@@ -272,6 +324,15 @@ Run the command below to start sim mode, put nothing in for a help print out.
 ![Simulator Running](README_Supps/simMode.png)
 
 A simulator window should open running Gazebo with a robot, input commands to move the RC car/robot.
-## Running Real-Mode
 
+## Running Real-Mode
+The instructions are the same as with sim mode - the only difference being:
+### GCS Start-Up on VM (SIM)
+- Set up is the same as with Sim-Mode.
+### RC Car Start-Up on WSL2 (REAL)
+- SSH into the Raspberry-Pi and to set-up config settings.
+- Use this command to start Real-Mode:
+``` bash
+./RCStart real
+```
 
