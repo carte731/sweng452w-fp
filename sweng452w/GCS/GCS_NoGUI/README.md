@@ -1,0 +1,2 @@
+### GCS No GUI Mode (GCS_NoGIU)
+Used for testing and initial prototyping - the GCS server and RC IP/Port are hard coded into the program. You have to manually change them. Additionally, there is no real-time mode - only file execution mode (the file is hard-coded as well, must be changed manually). Finally, you have to run the server and client in seperate terminal windows when communicating with the RC car/robot. 

@@ -24,7 +24,7 @@ using namespace std;
 void openFile() {
 
   // Opening file
-  string filename = "input.CEF";
+  string filename = "../input.CEF";
 
   // Makes each element into an indexed value
   myfile.open(filename.c_str());
