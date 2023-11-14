@@ -3,7 +3,7 @@
 <launch>
 
     <!-- Launcehs the YahBoom Drivers that allow for control with the ROS Control Board -->
-    <!-- <include file="$(find yahboomcar_bringup)/launch/driver_bringup.launch" /> -->
+    <include file="$(find yahboomcar_bringup)/launch/driver_bringup.launch" />
 
     <!-- Launches script that controls vehicle movement from Ground Control Station (GCS) -->
     <node pkg="sweng452w" name="finalProject" type="sweng452w" output="screen" />
