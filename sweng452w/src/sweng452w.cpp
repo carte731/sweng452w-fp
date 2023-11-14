@@ -24,7 +24,13 @@ int main(int argc, char **argv) {
   ros::Subscriber imuSubscription;
   
   // Attaches the inbound IMU data from the ROS robot to the method handler in the telemetry object
-  imuSubscription = dataNode.subscribe("imu", 2, &TelemetryClient::processImnTelemetry, &systemFrame.TelemServer);
+  if(getenv("RC_MODE") == "0"){
+    // RC_MODE == 0 means sim-mode, with Gazebo sim IMU readings
+    imuSubscription = dataNode.subscribe("imu", 2, &TelemetryClient::processImnTelemetry, &systemFrame.TelemServer);
+  } else {
+    // RC_MODE == 1 means real-mode, with YahBoom IMU readings
+    imuSubscription = dataNode.subscribe("imu_pub", 2, &TelemetryClient::processImnTelemetry, &systemFrame.TelemServer);
+  }
   
   // Start a thread that will listen for inbound connects
   // from Ground Control Station (GCS)

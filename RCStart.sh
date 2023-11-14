@@ -33,8 +33,10 @@ main(){
     # Allows the user to select sim (Gazebo and WSL2) or real mode (actual hardware)
     if [ "$MODE" == "sim" ]; then
         roslaunch sweng452w sweng452w_SIM_launch.launch 
+        export RC_MODE=0
     elif [ "$MODE" == "real" ]; then
-        roslaunch sweng452w sweng452w_launch.launch 
+        roslaunch sweng452w sweng452w_launch.launch
+        export RC_MODE=1
     else
         help
     fi
