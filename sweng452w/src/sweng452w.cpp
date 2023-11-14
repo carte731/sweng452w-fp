@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
   
   // Attaches the inbound IMU data from the ROS robot to the method handler in the telemetry object
   char* rcMode = std::getenv("RC_MODE");
-  if(rcMode == '0'){
+  if(atoi(rcMode) == 0){
     // RC_MODE == 0 means sim-mode, with Gazebo sim IMU readings
     imuSubscription = dataNode.subscribe("imu", 2, &TelemetryClient::processImnTelemetry, &systemFrame.TelemServer);
   } else {
