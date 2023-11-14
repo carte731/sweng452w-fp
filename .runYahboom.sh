@@ -1,0 +1,2 @@
+cd real_mode/yahboomcar_bringup/launch
+roslaunch driver_bringup.launch
