@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
     imuSubscription = dataNode.subscribe("imu", 2, &TelemetryClient::processImnTelemetry, &systemFrame.TelemServer);
   } else {
     // RC_MODE == 1 means real-mode, with YahBoom IMU readings
-    imuSubscription = dataNode.subscribe("imu_pub", 2, &TelemetryClient::processImnTelemetry, &systemFrame.TelemServer);
+    imuSubscription = dataNode.subscribe("pub_imu", 2, &TelemetryClient::processImnTelemetry, &systemFrame.TelemServer);
   }
   
   // Start a thread that will listen for inbound connects

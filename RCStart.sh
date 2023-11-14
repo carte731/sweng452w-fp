@@ -32,15 +32,15 @@ main(){
 
     # Allows the user to select sim (Gazebo and WSL2) or real mode (actual hardware)
     if [ "$MODE" == "sim" ]; then
-        roslaunch sweng452w sweng452w_SIM_launch.launch 
         export RC_MODE=0
+        roslaunch sweng452w sweng452w_SIM_launch.launch 
     elif [ "$MODE" == "real" ]; then
         #cd real_mode/yahboomcar_bringup/launch
         #roslaunch driver_bringup.launch &
         #cd -
+        export RC_MODE=1
         ./.runYahboom.sh &
         roslaunch sweng452w sweng452w_launch.launch
-        export RC_MODE=1
     else
         help
     fi

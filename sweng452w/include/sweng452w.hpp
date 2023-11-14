@@ -464,7 +464,7 @@ public:
     // Alternates between heartbeats and sending available IMU
     // data. Used for the Round-Robin functionalty
     void dataExecution(int itr){
-        switch(itr % 1000){
+        switch(itr % 100000){
             case(0):
                 //cout << "Sending Heat-Beat..." << endl;
                 this->sendHeartBeat();
