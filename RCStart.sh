@@ -35,7 +35,7 @@ main(){
         roslaunch sweng452w sweng452w_SIM_launch.launch 
         export RC_MODE=0
     elif [ "$MODE" == "real" ]; then
-        cd /real_mode/yahboomcar_bringup/launch
+        cd real_mode/yahboomcar_bringup/launch
         roslaunch driver_bringup.launch &
         cd -
         roslaunch sweng452w sweng452w_launch.launch
