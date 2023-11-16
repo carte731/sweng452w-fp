@@ -233,6 +233,41 @@ For further details, please read the material below:
 - [ROS Robot chassis repository](http://www.yahboom.net/study/ROS-chassis)
 - [ROS robot expansion board repository](http://www.yahboom.net/study/ROS-driver-Board)
 
+### Binding the ROS Hardware Controller to Raspberry Pi Serial Port
+This set is critical, for the Raspberry Pi to recongize the ROS Control Board - a new serial port rule must be made _(Note: This section won't work for later Ubuntu distros (Greater than 20 LTS) - you first have to unblock the usage of tinyUSB)_.
+
+After connecting the ROS board to the Raspberry Pi via a USB-C port - open a terminal and type:
+``` bash
+lsusb
+```
+there should be a list of connected devices, look for this device:
+``` bash
+ID 1a86:7523 QinHeng Electronics HL-340 USB-Serial adapter
+``` 
+If it's present, the devices are connected properly. Now lets add a binding rule - so the device can be auto-mounted correctly. Let's create a new rule by editing the rule file using this command:
+``` bash
+sudo nano /etc/udev/rules.d/myserial.rules
+``` 
+Copy and paste this command into the file:
+``` bash
+KERNEL=="ttyUSB*", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", MODE:="0777", SYMLINK+="myserial"
+```
+Save and close the file. Now we will open the permissions on the file:
+``` bash
+sudo chmod a+x /etc/udev/rules.d/myserial.rules
+```
+Now lets restart the serial port manage using these commands:
+``` bash
+sudo udevadm trigger
+sudo service udev reload
+sudo service udev restart
+```
+Finally, check to ensure the ROS board has mounted correctly:
+``` bash
+ll /dev/myserial
+```
+If you see the ROS Board attached to a tinyUSB port, congrats the ROS board is now attached to the serial port and can now receive commands from the Raspberry Pi. For more installation information, read through the [YahBoom ROS Board manual](http://www.yahboom.net/study/ROS-driver-Board).
+
 # Connect Visual Studio Code to Raspberry Pi and WSL2
 It is helpful to connect Visual Studio code to either the Raspberry-Pi (Real-Mode) and to WSL2  (Sim-Mode) to update config files or to experiment with the program and settings. It makes cross system development, cross-compiling a lot easier. 
 
