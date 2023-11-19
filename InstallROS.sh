@@ -62,7 +62,7 @@ catkin_init_workspace
 
 # Building workspace
 echo -n "\nBuilding ROS workspace\n"
-cd ..
+cd ../
 catkin_make
 
 ### INSTALLING PROJECT ###
