@@ -9,7 +9,7 @@ There are two operating modes for this project/software: Simulation-Mode (sim-mo
 The sim-mode allows for development and testing of the remote control system without having to mount the software to actual hardware. This allowed me to save time and money in final projects development cycle. Currently the project uses [Gazebo](https://gazebosim.org/home) as the simulator of choice and [Windows System for Linux 2](https://learn.microsoft.com/en-us/windows/wsl/about) (WSL2) to run ROS and Gazebo for simulator operations. This section will cover how to set-up a simulator environment and the GCS.
 
 ## WSL2
-WSL2 was chosen over a standard virtual machine for its GPU bypassing which is built into the platform. This allows you to use any Linux application with a Graphical User Interface (GUI) natively on Windows. Additionally, it allowed me connect, develop and cross-compile with [Visual Studio Code](https://code.visualstudio.com/docs/remote/wsl) on my Windows host machine. WSL2 running Ubuntu 20 will be installed.
+WSL2 was chosen over a standard virtual machine for its GPU pass-through which is built into the platform. This allows you to use any Linux application with a Graphical User Interface (GUI) natively on Windows. Additionally, it allowed me connect, develop and cross-compile with [Visual Studio Code](https://code.visualstudio.com/docs/remote/wsl) on my Windows host machine. WSL2 running Ubuntu 20 will be installed.
 
 ### Installing WSL2-Base
 Open PowerShell in admin mode. This can be done by searching for `powershell` in the Windows search bar. Next, right click the search result and select `Run as administrator`.
